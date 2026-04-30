@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVTD · Калькулятор ефективності трейд-маркетингових акцій</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F5F3EE;
+  --surface: #FFFFFF;
+  --surface2: #F0EDE6;
+  --border: #E2DDD6;
+  --text: #1A1814;
+  --text2: #6B6560;
+  --text3: #9E9890;
+  --accent: #2B5CE6;
+  --accent-bg: #EBF0FF;
+  --green: #1A7A4A;
+  --green-bg: #E8F5EE;
+  --red: #C0392B;
+  --red-bg: #FDECEA;
+  --amber: #92580A;
+  --amber-bg: #FEF3DC;
+  --purple: #6C3FA0;
+  --purple-bg: #F0E8FF;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px}
+h1,h2,h3,.mono{font-family:'Unbounded',sans-serif}
+
+.header{background:var(--text);color:white;padding:24px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.header-left{display:flex;flex-direction:column;gap:4px}
+.header-title{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:500;letter-spacing:.06em;color:#999;text-transform:uppercase}
+.header-name{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:700;color:white}
+.header-right{display:flex;gap:8px;flex-wrap:wrap}
+.header-badge{font-size:11px;font-weight:500;padding:5px 14px;border-radius:99px;letter-spacing:.03em}
+.badge-net{background:#2B5CE6;color:white}
+.badge-ver{background:rgba(255,255,255,.15);color:#ccc}
+
+.nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto}
+.nav-tab{padding:14px 20px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;letter-spacing:.01em;white-space:nowrap}
+.nav-tab:hover{color:var(--text)}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+.main{max-width:1020px;margin:0 auto;padding:28px 24px}
+.panel{display:none}.panel.active{display:block}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px}
+.card-title{font-family:'Unbounded',sans-serif;font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:16px}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.g5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:12px;color:var(--text2);font-weight:500}
+input[type=number],input[type=text],select{
+  height:38px;border:1px solid var(--border);border-radius:var(--radius-sm);
+  background:var(--bg);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;
+  padding:0 12px;transition:border .2s;width:100%
+}
+input:focus,select:focus{outline:none;border-color:var(--accent);background:white}
+input[type=number]{text-align:right}
+select{cursor:pointer}
+textarea{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;padding:10px 12px;width:100%;resize:vertical;min-height:60px}
+textarea:focus{outline:none;border-color:var(--accent);background:white}
+
+.tile{background:var(--surface2);border-radius:var(--radius-sm);padding:12px 14px}
+.tile-label{font-size:11px;color:var(--text3);margin-bottom:5px;font-weight:500}
+.tile-value{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:500;color:var(--text)}
+.tile-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.tile.accent{background:var(--accent-bg)}.tile.accent .tile-value{color:var(--accent)}
+.tile.green{background:var(--green-bg)}.tile.green .tile-value{color:var(--green)}
+.tile.red{background:var(--red-bg)}.tile.red .tile-value{color:var(--red)}
+.tile.amber{background:var(--amber-bg)}.tile.amber .tile-value{color:var(--amber)}
+.tile.purple{background:var(--purple-bg)}.tile.purple .tile-value{color:var(--purple)}
+
+.bar-wrap{height:26px;background:var(--surface2);border-radius:var(--radius-sm);overflow:hidden;position:relative;margin:8px 0}
+.bar-fill{height:100%;border-radius:var(--radius-sm);transition:width .4s cubic-bezier(.4,0,.2,1)}
+.bar-text{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:500;color:var(--text)}
+
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+
+.verdict{border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;font-weight:500;margin-top:10px;display:flex;align-items:center;gap:10px}
+.verdict-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.v-yes{background:var(--green-bg);color:var(--green)}
+.v-yes .verdict-icon{background:var(--green);color:white}
+.v-no{background:var(--red-bg);color:var(--red)}
+.v-no .verdict-icon{background:var(--red);color:white}
+.v-maybe{background:var(--amber-bg);color:var(--amber)}
+.v-maybe .verdict-icon{background:var(--amber);color:white}
+.v-info{background:var(--purple-bg);color:var(--purple)}
+.v-info .verdict-icon{background:var(--purple);color:white}
+
+.sc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+.sc-card{border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:border .2s}
+.sc-label{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.sc-pess .sc-label{color:var(--red)}
+.sc-real .sc-label{color:var(--amber)}
+.sc-opt .sc-label{color:var(--green)}
+.sc-roi{font-family:'Unbounded',sans-serif;font-size:22px;font-weight:700;margin-top:8px}
+.sc-details{font-size:12px;color:var(--text2);margin-top:5px;line-height:1.6}
+
+.sku-table{width:100%}
+.sku-header{display:grid;grid-template-columns:2.5fr 1fr 1fr 70px 1fr 28px;gap:8px;padding:0 0 8px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.sku-header span{font-size:11px;color:var(--text3);font-weight:500;text-align:center}
+.sku-header span:first-child{text-align:left}
+.sku-row{display:grid;grid-template-columns:2.5fr 1fr 1fr 70px 1fr 28px;gap:8px;align-items:end;padding:8px 0;border-bottom:1px solid var(--border)}
+.margin-pill{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:500;text-align:center;padding:8px 0 4px}
+
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.preset-chip{padding:5px 12px;border:1px solid var(--border);border-radius:99px;font-size:11px;font-weight:500;cursor:pointer;background:var(--surface2);color:var(--text2);transition:all .2s}
+.preset-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.preset-chip.used{opacity:.4;cursor:default}
+
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px}
+.cmp-table th{font-size:10px;font-weight:500;color:var(--text3);padding:7px 10px;border-bottom:1px solid var(--border);text-align:center;letter-spacing:.04em;text-transform:uppercase}
+.cmp-table th:first-child{text-align:left}
+.cmp-table td{padding:11px 10px;border-bottom:1px solid var(--border);text-align:center;color:var(--text);font-size:13px}
+.cmp-table td:first-child{text-align:left;font-weight:500}
+.cmp-table tr:hover td{background:var(--surface2)}
+.pill{display:inline-block;padding:3px 9px;border-radius:99px;font-size:10px;font-weight:500}
+
+.pf-sku-card{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden}
+.pf-sku-header{background:var(--surface2);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.pf-sku-title{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:500}
+.pf-sku-body{padding:18px;border-top:1px solid var(--border)}
+.pf-month-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:8px;align-items:end;padding:7px 0;border-bottom:1px solid var(--border)}
+
+.btn{padding:9px 18px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text2)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-accent{background:var(--accent);border:none;color:white}
+.btn-accent:hover{background:#1F4ACC}
+.btn-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;line-height:1;padding:0;transition:color .2s}
+.btn-del:hover{color:var(--red)}
+
+.result-sku-block{border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px}
+.result-sku-name{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:500;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+
+.net-selector{display:flex;gap:8px;margin-bottom:14px}
+.net-btn{padding:8px 18px;border:1px solid var(--border);border-radius:99px;font-size:12px;font-weight:500;cursor:pointer;background:var(--surface);color:var(--text2);transition:all .2s}
+.net-btn.active{background:var(--accent);border-color:var(--accent);color:white}
+.net-btn:hover:not(.active){border-color:var(--accent);color:var(--accent)}
+
+.eff-score{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;font-size:12px;font-weight:600;font-family:'Unbounded',sans-serif}
+
+.post-promo-row{display:grid;grid-template-columns:1.5fr repeat(3,1fr) 1fr;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;align-items:center}
+.post-promo-row:last-child{border-bottom:none}
+.post-promo-header{font-size:11px;color:var(--text3);font-weight:500}
+
+.tab-help{line-height:1.7;color:var(--text2);font-size:14px}
+.tab-help p{margin-bottom:10px}
+.formula-box{background:var(--surface2);border-radius:var(--radius-sm);padding:12px 16px;font-family:'Unbounded',sans-serif;font-size:12px;margin:10px 0;color:var(--accent)}
+.criteria-box{border-left:3px solid var(--accent);padding:10px 16px;background:var(--accent-bg);border-radius:0 var(--radius-sm) var(--radius-sm) 0;margin:10px 0;font-size:13px}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.panel.active{animation:fadeIn .2s ease}
+
+.footer{text-align:center;padding:28px;font-size:11px;color:var(--text3)}
+
+@media(max-width:700px){
+  .header{padding:18px 16px}.main{padding:18px 12px}
+  .nav{padding:0 12px}.nav-tab{padding:12px 12px;font-size:11px}
+  .g3,.g4,.g5,.sc-grid{grid-template-columns:1fr}
+  .g2{grid-template-columns:1fr}
+  .sku-header{display:none}
+  .sku-row{grid-template-columns:1fr 1fr;gap:6px}
+  .post-promo-row{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="header-title">AVTD · Аналітичний інструмент</div>
+    <div class="header-name">Калькулятор ефективності акцій</div>
+  </div>
+  <div class="header-right">
+    <span class="header-badge badge-net">Делві + Варус (факт відвантажень)</span>
+    <span class="header-badge badge-ver">v2.2 · Квітень 2026</span>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-tab active" onclick="switchTab(event,'plan')">Планування</button>
+  <button class="nav-tab" onclick="switchTab(event,'postfact')">Постфактум</button>
+  <button class="nav-tab" onclick="switchTab(event,'persist')">Стійкість ефекту</button>
+  <button class="nav-tab" onclick="switchTab(event,'compare')">Порівняння SKU</button>
+  <button class="nav-tab" onclick="switchTab(event,'network')">Мережі</button>
+  <button class="nav-tab" onclick="switchTab(event,'help')">Методологія</button>
+</nav>
+
+<div class="main">
+
+<!-- ═══════ ПЛАНУВАННЯ ═══════ -->
+<div id="panel-plan" class="panel active">
+  <div class="card">
+    <div class="card-title">Мережа та SKU для акції</div>
+    <div class="net-selector" id="plan-net-sel">
+      <button class="net-btn active" onclick="setPlanNet('delvi',this)">Делві</button>
+      <button class="net-btn" onclick="setPlanNet('varus',this)">Варус</button>
+      <button class="net-btn" onclick="setPlanNet('custom',this)">Інша мережа</button>
+    </div>
+    <div class="presets" id="plan-presets"></div>
+    <div class="sku-table">
+      <div class="sku-header">
+        <span>Назва SKU</span><span>Ціна, грн</span><span>Собівартість</span><span>Маржа</span><span>База шт/міс</span><span></span>
+      </div>
+      <div id="plan-sku-rows"></div>
+    </div>
+    <button class="btn btn-outline" onclick="addEmptySku()" style="margin-top:10px">+ Ввести новий SKU</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Параметри акції</div>
+    <div class="g3">
+      <div class="field"><label>Знижка з ціни (%)</label><input type="number" id="p-disc" value="10" step="0.5" min="0" max="99" oninput="calcPlan()"></div>
+      <div class="field"><label>Місяць акції</label>
+        <select id="p-month" onchange="calcPlan()">
+          <option value="1">Січень (×1.10)</option><option value="2">Лютий (×0.95)</option><option value="3">Березень (×0.95)</option>
+          <option value="4">Квітень (×1.20)</option><option value="5">Травень (×1.10)</option><option value="6" selected>Червень (×1.00)</option>
+          <option value="7">Липень (×1.13)</option><option value="8">Серпень (×1.15)</option><option value="9">Вересень (×1.10)</option>
+          <option value="10">Жовтень (×1.20)</option><option value="11">Листопад (×1.25)</option><option value="12">Грудень (×1.30)</option>
+        </select>
+      </div>
+      <div class="field"><label>Очікуваний Uplift (%)</label><input type="number" id="p-uplift" value="50" step="5" min="0" max="500" oninput="calcPlan()"></div>
+    </div>
+  </div>
+
+  <div id="plan-results"></div>
+
+  <div class="card" id="plan-scenarios-card" style="display:none">
+    <div class="card-title">Три сценарії (перший SKU)</div>
+    <div class="sc-grid">
+      <div class="sc-card sc-pess">
+        <div class="sc-label">Песимістичний</div>
+        <div class="field"><label>Uplift, %</label><input type="number" id="sc-p" value="20" step="5" min="-50" max="500" oninput="calcScenarios()"></div>
+        <div class="sc-roi" id="sc-p-roi">—</div><div class="sc-details" id="sc-p-det"></div><div id="sc-p-verd"></div>
+      </div>
+      <div class="sc-card sc-real">
+        <div class="sc-label">Реалістичний</div>
+        <div class="field"><label>Uplift, %</label><input type="number" id="sc-r" value="60" step="5" min="-50" max="500" oninput="calcScenarios()"></div>
+        <div class="sc-roi" id="sc-r-roi">—</div><div class="sc-details" id="sc-r-det"></div><div id="sc-r-verd"></div>
+      </div>
+      <div class="sc-card sc-opt">
+        <div class="sc-label">Оптимістичний</div>
+        <div class="field"><label>Uplift, %</label><input type="number" id="sc-o" value="120" step="5" min="-50" max="500" oninput="calcScenarios()"></div>
+        <div class="sc-roi" id="sc-o-roi">—</div><div class="sc-details" id="sc-o-det"></div><div id="sc-o-verd"></div>
+      </div>
+    </div>
+    <div id="sc-final"></div>
+  </div>
+</div>
+
+<!-- ═══════ ПОСТФАКТУМ ═══════ -->
+<div id="panel-postfact" class="panel">
+  <div class="card">
+    <div class="card-title">Мережа та параметри</div>
+    <div class="net-selector" id="pf-net-sel">
+      <button class="net-btn active" onclick="setPfNet('delvi',this)">Делві</button>
+      <button class="net-btn" onclick="setPfNet('varus',this)">Варус</button>
+    </div>
+    <div class="g3">
+      <div class="field"><label>Знижка з ціни (%)</label><input type="number" id="pf-disc" value="10" step="0.5" min="0" max="99" oninput="renderPfSkus()"></div>
+      <div style="grid-column:span 2;display:flex;align-items:flex-end">
+        <p style="font-size:12px;color:var(--text2);line-height:1.5">Введіть фактичні дані по кожному SKU. Сезонна база розраховується автоматично. Оцінка ефективності враховує всі 3 критерії AVTD.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="pf-skus"></div>
+  <button class="btn btn-outline" onclick="addPfSku()" style="margin-bottom:16px">+ Додати SKU</button>
+
+  <div id="pf-summary" style="display:none">
+    <div class="card">
+      <div class="card-title">Загальне зведення</div>
+      <div class="g4" id="pf-summary-tiles"></div>
+      <div id="pf-efficiency-score" style="margin-top:14px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ СТІЙКІСТЬ ЕФЕКТУ ═══════ -->
+<div id="panel-persist" class="panel">
+  <div class="card">
+    <div class="card-title">Аналіз стійкості (пост-акційний ефект)</div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:14px">
+      Цей аналіз перевіряє <strong>Критерій №2</strong>: чи зберігається приріст продажів після закінчення акції.
+      Порівняємо продажі в місяці після акції з сезонною базою. Якщо продажі вищі за базу — ефект стійкий.
+    </p>
+    <div class="g2" style="margin-bottom:14px">
+      <div class="field"><label>SKU для аналізу</label><input type="text" id="pers-sku" value="Green Day GD 0,5" oninput="calcPersist()"></div>
+      <div class="field"><label>Нейтральний рівень (шт/міс)</label><input type="number" id="pers-neutral" value="674" step="10" oninput="calcPersist()"></div>
+    </div>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:10px">Введіть фактичні продажі по місяцях (шт). Акційні місяці позначте ✓</p>
+    <div id="pers-months"></div>
+  </div>
+  <div id="pers-results"></div>
+</div>
+
+<!-- ═══════ ПОРІВНЯННЯ ═══════ -->
+<div id="panel-compare" class="panel">
+  <div class="card">
+    <div class="card-title">Параметри порівняння</div>
+    <div class="g3">
+      <div class="field"><label>Знижка (%)</label><input type="number" id="c-disc" value="10" step="0.5" min="0" max="99" oninput="renderCompare()"></div>
+      <div class="field"><label>Місяць акції</label>
+        <select id="c-month" onchange="renderCompare()">
+          <option value="1">Січень (×1.10)</option><option value="2">Лютий (×0.95)</option><option value="3">Березень (×0.95)</option>
+          <option value="4">Квітень (×1.20)</option><option value="5">Травень (×1.10)</option><option value="6" selected>Червень (×1.00)</option>
+          <option value="7">Липень (×1.13)</option><option value="8">Серпень (×1.15)</option><option value="9">Вересень (×1.10)</option>
+          <option value="10">Жовтень (×1.20)</option><option value="11">Листопад (×1.25)</option><option value="12">Грудень (×1.30)</option>
+        </select>
+      </div>
+      <div class="field"><label>Очікуваний Uplift (%)</label><input type="number" id="c-upl" value="50" step="5" min="0" max="500" oninput="renderCompare()"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Break-even по SKU (від найпростішого до найскладнішого)</div>
+    <div id="cmp-table-wrap"></div>
+  </div>
+</div>
+
+<!-- ═══════ МЕРЕЖІ ═══════ -->
+<div id="panel-network" class="panel">
+  <div class="card">
+    <div class="card-title">Порівняння ефективності по мережах</div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:14px">
+      Зведена таблиця ROI акцій по мережах Делві та Варус. Дозволяє побачити, де знижка працює краще для тих самих або схожих SKU.
+    </p>
+    <div id="network-comparison"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Ключові відмінності</div>
+    <div id="network-insights"></div>
+  </div>
+</div>
+
+<!-- ═══════ МЕТОДОЛОГІЯ ═══════ -->
+<div id="panel-help" class="panel">
+  <div class="card">
+    <div class="card-title">Три критерії ефективності (AVTD)</div>
+    <div class="tab-help">
+      <div class="criteria-box">
+        <strong>Критерій 1:</strong> Продажі зросли без збільшення бюджету → рахуємо Uplift та ROI<br>
+        <strong>Критерій 2:</strong> Приріст зберігається після закінчення акції → аналіз стійкості (пост-акційний ефект)<br>
+        <strong>Критерій 3:</strong> Приріст спостерігається під час акції → базовий Uplift > 0%
+      </div>
+      <p>Акція ефективна тільки якщо задовольняє щонайменше Критерії 1 і 3, ідеально — всі три.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Break-even Uplift</div>
+    <div class="tab-help">
+      <p>Мінімальний приріст продажів, при якому акція виходить на нуль:</p>
+      <div class="formula-box">Break-even = Знижка грн/од. ÷ Маржа з акцією × 100%</div>
+      <p><strong>Приклад (Green Day 0,5):</strong> Ціна 109.20, Собівартість 74.72, Знижка 10% = 10.92 грн. Маржа з акцією = 23.56 грн. Break-even = 10.92 ÷ 23.56 = <strong>46.3%</strong></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ROI акції</div>
+    <div class="tab-help">
+      <div class="formula-box">ROI = Інкрементальна маржа ÷ Бюджет знижки × 100%</div>
+      <p><strong>Інкрементальна маржа</strong> = Маржа(акція) × Факт − Маржа(база) × База</p>
+      <p><strong>Бюджет знижки</strong> = Знижка грн/од. × Факт. обсяг</p>
+      <div style="display:flex;flex-direction:column;gap:5px;margin-top:10px">
+        <div class="verdict v-yes" style="margin:0"><div class="verdict-icon">✓</div>ROI > 0% → прибуткова</div>
+        <div class="verdict v-maybe" style="margin:0"><div class="verdict-icon">~</div>ROI = 0% → беззбитковість</div>
+        <div class="verdict v-no" style="margin:0"><div class="verdict-icon">✕</div>ROI < 0% → збиткова</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Комплексна оцінка (Efficiency Score)</div>
+    <div class="tab-help">
+      <p>Система нараховує від 0 до 100 балів на основі:</p>
+      <div class="formula-box">Score = ROI_score (0–40) + Uplift_score (0–30) + Cost_efficiency (0–20) + Persistence_bonus (0–10)</div>
+      <p><strong>ROI score:</strong> 40 балів якщо ROI ≥ 50%, пропорційно менше при ROI < 50%, 0 при ROI ≤ 0.</p>
+      <p><strong>Uplift score:</strong> 30 балів якщо Uplift ≥ BE × 2, пропорційно якщо між BE та BE×2, 0 якщо < BE.</p>
+      <p><strong>Cost efficiency:</strong> 20 балів якщо витрати на 1 додаткову одиницю ≤ 30% маржі, 0 якщо > 100%.</p>
+      <p><strong>Persistence:</strong> +10 якщо пост-акційні продажі ≥ 105% бази (потрібно заповнити вкладку "Стійкість").</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Пост-акційний провал (Pantry Loading / Pull-Forward)</div>
+    <div class="tab-help">
+      <p>У FMCG <strong>59% акцій збиткові</strong> через приховані ефекти. Один з головних — "post-promotion dip": покупці запасаються під час акції і не купують потім.</p>
+      <p>Для алкоголю ефект слабший, але присутній у сезонних категоріях. Вкладка "Стійкість ефекту" дозволяє це перевірити.</p>
+      <p><strong>Канібалізація</strong> — промо одного SKU може зменшити продажі іншого з того ж портфелю. Слід відстежувати динаміку всіх SKU в категорії.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Сезонні коефіцієнти</div>
+    <div id="sea-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>
+    <p style="font-size:12px;color:var(--text2);margin-top:10px">Червень = 1.0 (еталон). Коефіцієнти відображають досвід компанії AVTD.</p>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">AVTD · Калькулятор ефективності трейд-маркетингових акцій · v2.2 · Квітень 2026</div>
+
+<script>
+const SEA={1:1.10,2:0.95,3:0.95,4:1.20,5:1.10,6:1.00,7:1.13,8:1.15,9:1.10,10:1.20,11:1.25,12:1.30};
+const MONTHS=['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+
+const PRESETS_DELVI=[
+  {name:"Мускат Рів'єра 0,75",price:54.00,cost:36.90,base:116},
+  {name:"Green Day GD 0,5",price:109.20,cost:74.72,base:674},
+  {name:"Дивін Аджарі 3* 0,5",price:177.90,cost:121.79,base:125},
+];
+
+const PRESETS_VARUS=[
+  {name:"Green Day GD 0,7",price:128.49,cost:101.13,base:2627},
+  {name:"Дивин Аджари 3* 0,5",price:156.46,cost:121.79,base:2470},
+  {name:"Green Day GD 0,5",price:97.43,cost:74.72,base:2372},
+  {name:"Green Day GD 1,0",price:195.67,cost:143.69,base:760},
+  {name:"Дивин Довбуш 3* 0,5",price:160.84,cost:122.4,base:643},
+  {name:"Мускат MARBEL 0,75",price:92.30,cost:71.52,base:950},
+  {name:"Мускат Ривьера 1,5",price:145.78,cost:111.42,base:484},
+  {name:"Дивин Довбуш 5* 0,5",price:177.71,cost:132.84,base:471},
+  {name:"Дивин Аджари 5* 0,5",price:172.07,cost:130.82,base:243},
+  {name:"Аджари Вишня 0,5",price:121.39,cost:93.0,base:553},
+  {name:"Лимон GD 0,5",price:101.37,cost:78.9,base:337},
+  {name:"Шардоне 0,75",price:92.22,cost:70.44,base:428},
+  {name:"Шато Барон 1,5",price:145.83,cost:111.78,base:351},
+  {name:"Шато Барон 0,75",price:91.80,cost:70.14,base:369},
+  {name:"Дивин Аджари 3* 1,0",price:283.27,cost:216.01,base:368},
+  {name:"Original Life GD 0,5",price:97.53,cost:74.78,base:204},
+  {name:"Шевалье Руж 1,5",price:136.75,cost:104.64,base:247},
+  {name:"Мускат Бербарро 0,75",price:94.73,cost:72.24,base:503},
+  {name:"Дивин Аджари 5* 0,25",price:98.25,cost:72.45,base:343},
+  {name:"Дивин Адамян 3* 0,5",price:163.80,cost:119.88,base:326},
+  {name:"Green Day GD 0,375",price:81.67,cost:59.96,base:293},
+  {name:"Дивин Довбуш 3* 0,25",price:85.71,cost:64.62,base:172},
+  {name:"CRYSTAL GD 0,7",price:137.33,cost:101.58,base:249},
+  {name:"CRYSTAL GD 0,5",price:102.10,cost:75.20,base:338},
+  {name:"Пино Нуар 0,75",price:93.34,cost:71.16,base:189},
+];
+
+let currentPlanNet='delvi';
+let currentPfNet='delvi';
+let planSkus=[];
+
+// Delvi postfactum data
+const PF_DELVI=[
+  {name:"Мускат Рів'єра 0,75",price:54.00,cost:36.90,months:[
+    {month:2,base:110,fact:168},{month:5,base:128,fact:144},{month:6,base:116,fact:168},{month:8,base:133,fact:156}
+  ]},
+  {name:"Green Day GD 0,5",price:109.20,cost:74.72,months:[
+    {month:2,base:640,fact:1280},{month:5,base:741,fact:1220},{month:6,base:674,fact:900},{month:9,base:741,fact:1860},{month:10,base:808,fact:2580}
+  ]},
+  {name:"Дивін Аджарі 3* 0,5",price:177.90,cost:121.79,months:[
+    {month:5,base:137,fact:156},{month:8,base:144,fact:36}
+  ]},
+];
+
+// Varus postfactum — FACT shipments (Продажі компанії) + real costs (Собівартість)
+// Promo months identified from Акції sheet (plan volumes ignored, only month markers used)
+const PF_VARUS=[
+  {name:"Green Day GD 0,7",price:128.49,cost:101.13,months:[
+    {month:7,base:2968,fact:0},{month:11,base:3283,fact:6254},{month:12,base:3415,fact:4188}
+  ]},
+  {name:"Дивин Аджари 3* 0,5",price:156.46,cost:121.79,months:[
+    {month:10,base:2964,fact:6672},{month:11,base:3087,fact:3600},{month:12,base:3211,fact:2556}
+  ]},
+  {name:"Green Day GD 0,5",price:97.43,cost:74.72,months:[
+    {month:6,base:2372,fact:2180},{month:7,base:2681,fact:0},{month:11,base:2965,fact:1580},{month:12,base:3084,fact:2780}
+  ]},
+  {name:"Green Day GD 1,0",price:195.67,cost:143.69,months:[
+    {month:7,base:859,fact:0},{month:11,base:950,fact:4098}
+  ]},
+  {name:"Дивин Довбуш 3* 0,5",price:160.84,cost:122.4,months:[
+    {month:1,base:707,fact:864},{month:2,base:610,fact:1740},{month:5,base:707,fact:1632},{month:6,base:643,fact:1512},{month:7,base:726,fact:0},{month:8,base:739,fact:84},{month:10,base:771,fact:2520},{month:11,base:803,fact:1642},{month:12,base:835,fact:300}
+  ]},
+  {name:"Мускат MARBEL 0,75",price:92.30,cost:71.52,months:[
+    {month:1,base:1045,fact:1008},{month:5,base:1045,fact:492},{month:6,base:950,fact:144},{month:7,base:1074,fact:684},{month:8,base:1093,fact:348},{month:12,base:1235,fact:72}
+  ]},
+  {name:"Дивин Довбуш 5* 0,5",price:177.71,cost:132.84,months:[
+    {month:1,base:518,fact:492},{month:2,base:447,fact:720},{month:5,base:518,fact:1092},{month:6,base:471,fact:672},{month:7,base:532,fact:576},{month:8,base:541,fact:180},{month:9,base:518,fact:408},{month:10,base:565,fact:1392},{month:11,base:588,fact:862},{month:12,base:612,fact:564}
+  ]},
+  {name:"Дивин Аджари 5* 0,5",price:172.07,cost:130.82,months:[
+    {month:8,base:279,fact:528},{month:9,base:267,fact:300},{month:10,base:291,fact:2076},{month:11,base:303,fact:1008},{month:12,base:316,fact:1548}
+  ]},
+  {name:"Аджари Вишня 0,5",price:121.39,cost:93.0,months:[
+    {month:6,base:553,fact:168},{month:7,base:625,fact:84},{month:8,base:636,fact:252},{month:9,base:608,fact:60},{month:11,base:691,fact:3474},{month:12,base:719,fact:420}
+  ]},
+  {name:"Лимон GD 0,5",price:101.37,cost:78.9,months:[
+    {month:6,base:337,fact:300},{month:7,base:381,fact:0},{month:11,base:422,fact:2390},{month:12,base:438,fact:600}
+  ]},
+  {name:"Шардоне 0,75",price:92.22,cost:70.44,months:[
+    {month:1,base:471,fact:36},{month:2,base:407,fact:264},{month:5,base:471,fact:888},{month:6,base:428,fact:708},{month:7,base:484,fact:0},{month:8,base:492,fact:276},{month:12,base:556,fact:372}
+  ]},
+  {name:"Original Life GD 0,5",price:97.53,cost:74.78,months:[
+    {month:1,base:224,fact:456},{month:2,base:193,fact:120},{month:5,base:224,fact:780},{month:6,base:204,fact:444},{month:7,base:230,fact:0},{month:8,base:234,fact:444},{month:11,base:254,fact:504},{month:12,base:265,fact:132}
+  ]},
+];
+
+let pfSkus=[...PF_DELVI.map(s=>({...s,months:s.months.map(m=>({...m}))}))];
+
+// Persistence data
+let persMonths=[];
+for(let i=1;i<=12;i++){
+  const isPromo=[2,5,6,9,10].includes(i);
+  const fakeData={1:700,2:1280,3:680,4:750,5:1220,6:900,7:690,8:710,9:1860,10:2580,11:720,12:850};
+  persMonths.push({month:i,fact:fakeData[i]||0,isPromo:isPromo});
+}
+
+function fmt(n,d=2){return isFinite(n)?n.toFixed(d):'—'}
+function fmtI(n){return isFinite(n)?Math.round(n).toLocaleString('uk-UA'):'—'}
+function fmtP(n,d=1){if(!isFinite(n))return'—';return(n>=0?'+':'')+n.toFixed(d)+'%'}
+function fmtG(n){if(!isFinite(n))return'—';return(n>=0?'+':'')+fmtI(n)+' ₴'}
+
+function calcMetrics(price,cost,discPct){
+  const disc=price*discPct/100;
+  const effPrice=price-disc;
+  const mb=price-cost;
+  const mp=effPrice-cost;
+  const lossP=mb>0?disc/mb*100:0;
+  const be=mp>0?disc/mp*100:Infinity;
+  return{disc,effPrice,mb,mp,lossP,be};
+}
+
+function calcEffScore(roi,uplift,be,costPerUnit,mb){
+  let s=0;
+  // ROI: 0-40
+  if(roi>0) s+=Math.min(40, roi/50*40);
+  // Uplift vs BE: 0-30
+  if(uplift>=be) s+=Math.min(30, (uplift/be-1)*30/(be>0?1:1)+15);
+  if(uplift>=be*2) s=Math.min(s,70)+30-Math.min(s,70)+30; // cap recalc
+  s=0;
+  if(roi>0) s+=Math.min(40,roi/50*40);
+  if(uplift>=be && be>0) s+=Math.min(30,(uplift/(be*2))*30);
+  if(mb>0 && costPerUnit<=mb*0.3) s+=20;
+  else if(mb>0 && costPerUnit<=mb) s+=Math.max(0,20*(1-costPerUnit/mb));
+  return Math.round(Math.min(100,s));
+}
+
+function scoreLabel(sc){
+  if(sc>=75) return {text:'Відмінно',cls:'green'};
+  if(sc>=50) return {text:'Добре',cls:'amber'};
+  if(sc>=25) return {text:'Слабко',cls:'amber'};
+  return {text:'Неефективно',cls:'red'};
+}
+
+// ── TAB ──
+function switchTab(e,id){
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+  if(id==='compare')renderCompare();
+  if(id==='help')renderHelp();
+  if(id==='persist')renderPersist();
+  if(id==='network')renderNetwork();
+}
+
+// ── NETWORK SELECT ──
+function setPlanNet(net,btn){
+  currentPlanNet=net;
+  document.querySelectorAll('#plan-net-sel .net-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  planSkus=[];
+  renderPlanSkus();calcPlan();
+}
+function setPfNet(net,btn){
+  currentPfNet=net;
+  document.querySelectorAll('#pf-net-sel .net-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  pfSkus=net==='delvi'?PF_DELVI.map(s=>({...s,months:s.months.map(m=>({...m}))})):PF_VARUS.map(s=>({...s,months:s.months.map(m=>({...m}))}));
+  renderPfSkus();
+}
+
+function getPresets(){
+  if(currentPlanNet==='delvi') return PRESETS_DELVI;
+  if(currentPlanNet==='varus') return PRESETS_VARUS;
+  return[];
+}
+
+// ══ ПЛАНУВАННЯ ══
+function renderPlanPresets(){
+  const wrap=document.getElementById('plan-presets');
+  const presets=getPresets();
+  wrap.innerHTML='';
+  presets.forEach((p,i)=>{
+    const used=planSkus.some(s=>s.name===p.name);
+    const chip=document.createElement('button');
+    chip.className='preset-chip'+(used?' used':'');
+    chip.textContent=p.name;
+    if(!used) chip.onclick=()=>{planSkus.push({...presets[i]});renderPlanSkus();calcPlan();};
+    wrap.appendChild(chip);
+  });
+}
+function addEmptySku(){planSkus.push({name:'',price:'',cost:'',base:''});renderPlanSkus();calcPlan();}
+function removePlanSku(i){planSkus.splice(i,1);renderPlanSkus();calcPlan();}
+
+function renderPlanSkus(){
+  renderPlanPresets();
+  const wrap=document.getElementById('plan-sku-rows');
+  wrap.innerHTML='';
+  planSkus.forEach((s,i)=>{
+    const mp=s.price>0&&s.cost>=0?(s.price-s.cost)/s.price*100:NaN;
+    const mpColor=isNaN(mp)?'var(--text3)':mp>35?'var(--green)':mp>20?'var(--amber)':'var(--red)';
+    const row=document.createElement('div');
+    row.className='sku-row';
+    row.innerHTML=`
+      <div class="field"><input type="text" placeholder="Назва" value="${s.name}" oninput="planSkus[${i}].name=this.value;renderPlanPresets();calcPlan()"></div>
+      <div class="field"><input type="number" placeholder="109.20" value="${s.price}" step="0.1" min="0" oninput="planSkus[${i}].price=parseFloat(this.value)||0;renderPlanSkus();calcPlan()"></div>
+      <div class="field"><input type="number" placeholder="74.72" value="${s.cost}" step="0.1" min="0" oninput="planSkus[${i}].cost=parseFloat(this.value)||0;renderPlanSkus();calcPlan()"></div>
+      <div class="margin-pill" style="color:${mpColor}">${isNaN(mp)?'—':mp.toFixed(1)+'%'}</div>
+      <div class="field"><input type="number" placeholder="200" value="${s.base}" step="10" min="0" oninput="planSkus[${i}].base=parseFloat(this.value)||0;calcPlan()"></div>
+      <button class="btn-del" onclick="removePlanSku(${i})">×</button>`;
+    wrap.appendChild(row);
+  });
+}
+
+function calcPlan(){
+  const discPct=parseFloat(document.getElementById('p-disc').value)||0;
+  const month=parseInt(document.getElementById('p-month').value)||6;
+  const upliftCmp=parseFloat(document.getElementById('p-uplift').value)||0;
+  const seaCoef=SEA[month]||1;
+  const cont=document.getElementById('plan-results');
+  const scCard=document.getElementById('plan-scenarios-card');
+  const valid=planSkus.filter(s=>s.price>0&&s.cost>=0&&s.base>0);
+  if(!valid.length){cont.innerHTML='';scCard.style.display='none';return;}
+  scCard.style.display='block';
+  let html='';
+  valid.forEach(s=>{
+    const m=calcMetrics(s.price,s.cost,discPct);
+    const seaBase=s.base*seaCoef;
+    const beVol=seaBase*(m.be/100);
+    const barPct=Math.min(m.be/200*100,100);
+    const barColor=m.be>100?'#E57373':m.be>50?'#FFB74D':'#66BB6A';
+    const beCC=m.be>100?'red':m.be>50?'amber':'green';
+    const promoVol=seaBase*(1+upliftCmp/100);
+    const budget=m.disc*promoVol;
+    const incr=(m.mp*promoVol)-(m.mb*seaBase);
+    const roi=budget>0?incr/budget*100:0;
+    const costPer=promoVol>seaBase?budget/(promoVol-seaBase):Infinity;
+    const esc=calcEffScore(roi,upliftCmp,m.be,costPer,m.mb);
+    const escL=scoreLabel(esc);
+    let verdHtml='';
+    if(roi>0) verdHtml=`<div class="verdict v-yes"><div class="verdict-icon">✓</div>При Uplift ${upliftCmp}% — прибуткова (ROI ${fmtP(roi)}). Критерії 1 та 3 виконані.</div>`;
+    else if(roi>-15) verdHtml=`<div class="verdict v-maybe"><div class="verdict-icon">~</div>При Uplift ${upliftCmp}% — майже беззбиткова (ROI ${fmtP(roi)}). Потрібен ≥${fmt(m.be,1)}%</div>`;
+    else verdHtml=`<div class="verdict v-no"><div class="verdict-icon">✕</div>При Uplift ${upliftCmp}% — збиткова (ROI ${fmtP(roi)}). Потрібен ≥${fmt(m.be,1)}%</div>`;
+    html+=`<div class="result-sku-block">
+      <div class="result-sku-name">${s.name||'SKU'} <span style="font-weight:300;color:var(--text3);font-size:11px">· ${fmt(s.price)} грн · −${discPct}% · ${MONTHS[month-1]}</span>
+        <span class="eff-score" style="float:right;background:var(--${escL.cls}-bg);color:var(--${escL.cls})">${esc}/100 ${escL.text}</span>
+      </div>
+      <div class="g5" style="margin-bottom:14px">
+        <div class="tile"><div class="tile-label">Маржа без акції</div><div class="tile-value">${fmt(m.mb)} ₴</div><div class="tile-sub">грн/од.</div></div>
+        <div class="tile red"><div class="tile-label">Маржа з акцією</div><div class="tile-value">${fmt(m.mp)} ₴</div><div class="tile-sub">грн/од.</div></div>
+        <div class="tile amber"><div class="tile-label">Знижка з'їдає</div><div class="tile-value">${fmt(m.lossP,1)}%</div><div class="tile-sub">від маржі</div></div>
+        <div class="tile ${beCC}"><div class="tile-label">Break-even</div><div class="tile-value">${fmt(m.be,1)}%</div><div class="tile-sub">мін. Uplift</div></div>
+        <div class="tile accent"><div class="tile-label">Вартість +1 шт</div><div class="tile-value">${isFinite(costPer)?fmt(costPer,1):'—'} ₴</div><div class="tile-sub">бюджет/інкр.од.</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Сезонна база ${MONTHS[month-1]} (×${seaCoef}): <strong>${fmtI(seaBase)} шт</strong> — для окупності потрібно ще:</div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${barPct}%;background:${barColor}"></div><div class="bar-text">+${fmtI(beVol)} шт</div></div>
+      ${verdHtml}
+    </div>`;
+  });
+  cont.innerHTML=html;
+  calcScenarios();
+}
+
+function calcScenarios(){
+  const discPct=parseFloat(document.getElementById('p-disc').value)||0;
+  const month=parseInt(document.getElementById('p-month').value)||6;
+  const seaCoef=SEA[month]||1;
+  const valid=planSkus.filter(s=>s.price>0&&s.cost>=0&&s.base>0);
+  if(!valid.length)return;
+  const s=valid[0];
+  const m=calcMetrics(s.price,s.cost,discPct);
+  const seaBase=s.base*seaCoef;
+  ['p','r','o'].forEach(id=>{
+    const upl=parseFloat(document.getElementById('sc-'+id).value)||0;
+    const promoVol=seaBase*(1+upl/100);
+    const budget=m.disc*promoVol;
+    const incr=(m.mp*promoVol)-(m.mb*seaBase);
+    const roi=budget>0?incr/budget*100:0;
+    const roiColor=roi>0?'var(--green)':roi<0?'var(--red)':'var(--amber)';
+    document.getElementById('sc-'+id+'-roi').textContent='ROI '+fmtP(roi);
+    document.getElementById('sc-'+id+'-roi').style.color=roiColor;
+    document.getElementById('sc-'+id+'-det').innerHTML=`Обсяг: ${fmtI(promoVol)} шт (+${fmtI(promoVol-seaBase)})<br>Інкр. маржа: ${fmtG(incr)}<br>Бюджет: ${fmtI(budget)} ₴`;
+    const vEl=document.getElementById('sc-'+id+'-verd');
+    if(roi>0) vEl.innerHTML=`<div class="verdict v-yes" style="margin-top:6px"><div class="verdict-icon">✓</div>Прибуткова</div>`;
+    else if(roi>-15) vEl.innerHTML=`<div class="verdict v-maybe" style="margin-top:6px"><div class="verdict-icon">~</div>Майже ок</div>`;
+    else vEl.innerHTML=`<div class="verdict v-no" style="margin-top:6px"><div class="verdict-icon">✕</div>Збиткова</div>`;
+  });
+  const beVal=m.be;
+  const upls=['p','r','o'].map(id=>parseFloat(document.getElementById('sc-'+id).value)||0);
+  const ok=upls.filter(u=>u>=beVal).length;
+  const fv=document.getElementById('sc-final');
+  const skuLabel=`для ${s.name||'SKU'}`;
+  if(ok===3) fv.innerHTML=`<div class="verdict v-yes"><div class="verdict-icon">✓</div>Рекомендація ${skuLabel}: проводити — всі сценарії прибуткові.</div>`;
+  else if(ok===0) fv.innerHTML=`<div class="verdict v-no"><div class="verdict-icon">✕</div>Рекомендація ${skuLabel}: не проводити — жоден сценарій не окупається.</div>`;
+  else if(ok>=2) fv.innerHTML=`<div class="verdict v-maybe"><div class="verdict-icon">~</div>Рекомендація ${skuLabel}: розглянути — ${ok}/3 сценаріїв прибуткові.</div>`;
+  else fv.innerHTML=`<div class="verdict v-no"><div class="verdict-icon">✕</div>Рекомендація ${skuLabel}: ризиковано — лише 1 сценарій прибутковий.</div>`;
+}
+
+// ══ ПОСТФАКТУМ ══
+function renderPfSkus(){
+  const cont=document.getElementById('pf-skus');
+  cont.innerHTML='';
+  const discPct=parseFloat(document.getElementById('pf-disc').value)||0;
+  pfSkus.forEach((sku,si)=>{
+    const m=calcMetrics(sku.price,sku.cost,discPct);
+    let totalPromo=0,totalBase=0;
+    let mRows='';
+    sku.months.forEach((mo,mi)=>{
+      const uplift=mo.base>0?(mo.fact/mo.base-1)*100:0;
+      const upColor=uplift>=0?'var(--green)':'var(--red)';
+      totalPromo+=mo.fact;totalBase+=mo.base;
+      mRows+=`<div class="pf-month-row">
+        <div class="field"><label>Місяць</label><select onchange="pfSkus[${si}].months[${mi}].month=parseInt(this.value);renderPfSkus()">
+          ${MONTHS.map((mn,idx)=>`<option value="${idx+1}"${mo.month===idx+1?' selected':''}>${mn}</option>`).join('')}
+        </select></div>
+        <div class="field"><label>Коеф.</label><input type="number" value="${SEA[mo.month]}" readonly style="background:var(--surface2);color:var(--text3)"></div>
+        <div class="field"><label>База (шт)</label><input type="number" value="${mo.base}" step="10" min="0" oninput="pfSkus[${si}].months[${mi}].base=parseFloat(this.value)||0;renderPfSkus()"></div>
+        <div class="field"><label>Факт (шт)</label><input type="number" value="${mo.fact}" step="10" min="0" oninput="pfSkus[${si}].months[${mi}].fact=parseFloat(this.value)||0;renderPfSkus()"></div>
+        <div class="field"><label>Uplift</label><input type="text" value="${fmtP(uplift)}" readonly style="color:${upColor};background:var(--surface2);font-weight:500"></div>
+      </div>`;
+    });
+    const budget=m.disc*totalPromo;
+    const incr=(m.mp*totalPromo)-(m.mb*totalBase);
+    const roi=budget>0?incr/budget*100:0;
+    const totalUplift=totalBase>0?(totalPromo/totalBase-1)*100:0;
+    const costPer=totalPromo>totalBase?budget/(totalPromo-totalBase):Infinity;
+    const esc=calcEffScore(roi,totalUplift,m.be,isFinite(costPer)?costPer:999,m.mb);
+    const escL=scoreLabel(esc);
+    const roiClass=roi>0?'v-yes':roi<0?'v-no':'v-maybe';
+    const roiIcon=roi>0?'✓':roi<0?'✕':'~';
+    const card=document.createElement('div');
+    card.className='pf-sku-card';
+    card.innerHTML=`
+      <div class="pf-sku-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+        <div>
+          <div class="pf-sku-title">${sku.name} <span class="eff-score" style="background:var(--${escL.cls}-bg);color:var(--${escL.cls});margin-left:8px">${esc}/100</span></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">Uplift ${fmtP(totalUplift)} · ROI ${fmtP(roi)} · Інкр. маржа ${fmtG(incr)} · Бюджет ${fmtI(budget)} ₴</div>
+        </div>
+        <div class="verdict ${roiClass}" style="margin:0;padding:6px 12px"><div class="verdict-icon">${roiIcon}</div>${roi>0?'Прибуткова':roi<0?'Збиткова':'Беззбитк.'}</div>
+      </div>
+      <div class="pf-sku-body" style="display:none">
+        <div class="g5" style="margin-bottom:16px">
+          <div class="tile"><div class="tile-label">Маржа без</div><div class="tile-value">${fmt(m.mb)} ₴</div></div>
+          <div class="tile red"><div class="tile-label">Маржа з акцією</div><div class="tile-value">${fmt(m.mp)} ₴</div></div>
+          <div class="tile ${roi>=0?'green':'red'}"><div class="tile-label">Інкр. маржа</div><div class="tile-value">${fmtG(incr)}</div></div>
+          <div class="tile ${roi>=0?'green':'red'}"><div class="tile-label">ROI</div><div class="tile-value">${fmtP(roi)}</div></div>
+          <div class="tile accent"><div class="tile-label">+1 шт коштує</div><div class="tile-value">${isFinite(costPer)?fmt(costPer,1):'—'} ₴</div></div>
+        </div>
+        <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:11px;font-weight:500;color:var(--text2)">Місяці акції</div>
+          <button class="btn btn-outline" style="font-size:10px;padding:4px 10px" onclick="pfSkus[${si}].months.push({month:6,base:100,fact:100});renderPfSkus()">+ Місяць</button>
+        </div>
+        ${mRows}
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <div class="field" style="flex:1;min-width:140px"><label>Назва</label><input type="text" value="${sku.name}" oninput="pfSkus[${si}].name=this.value"></div>
+          <div class="field" style="width:110px"><label>Ціна</label><input type="number" value="${sku.price}" step="0.1" oninput="pfSkus[${si}].price=parseFloat(this.value)||0;renderPfSkus()"></div>
+          <div class="field" style="width:110px"><label>Собівартість</label><input type="number" value="${sku.cost}" step="0.1" oninput="pfSkus[${si}].cost=parseFloat(this.value)||0;renderPfSkus()"></div>
+          <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+            <button class="btn btn-outline" style="font-size:10px;padding:6px 10px;color:var(--red);border-color:var(--red)" onclick="pfSkus.splice(${si},1);renderPfSkus()">Видалити</button>
+          </div>
+        </div>
+      </div>`;
+    cont.appendChild(card);
+  });
+  updatePfSummary();
+}
+
+function addPfSku(){pfSkus.push({name:'Новий SKU',price:0,cost:0,months:[{month:6,base:100,fact:100}]});renderPfSkus();}
+
+function updatePfSummary(){
+  const discPct=parseFloat(document.getElementById('pf-disc').value)||0;
+  let totalBudget=0,totalIncr=0,profitable=0;
+  pfSkus.forEach(sku=>{
+    if(!sku.price||!sku.cost)return;
+    const m=calcMetrics(sku.price,sku.cost,discPct);
+    let tp=0,tb=0;
+    sku.months.forEach(mo=>{tp+=mo.fact;tb+=mo.base;});
+    const budget=m.disc*tp;
+    const incr=(m.mp*tp)-(m.mb*tb);
+    totalBudget+=budget;totalIncr+=incr;
+    if(incr>0)profitable++;
+  });
+  const totalRoi=totalBudget>0?totalIncr/totalBudget*100:0;
+  const summ=document.getElementById('pf-summary');
+  const tiles=document.getElementById('pf-summary-tiles');
+  const effDiv=document.getElementById('pf-efficiency-score');
+  if(pfSkus.length>0){
+    summ.style.display='block';
+    tiles.innerHTML=`
+      <div class="tile ${totalIncr>=0?'green':'red'}"><div class="tile-label">Загальна інкр. маржа</div><div class="tile-value">${fmtG(totalIncr)}</div></div>
+      <div class="tile ${totalRoi>=0?'green':'red'}"><div class="tile-label">Загальний ROI</div><div class="tile-value">${fmtP(totalRoi)}</div></div>
+      <div class="tile"><div class="tile-label">Бюджет знижки</div><div class="tile-value">${fmtI(totalBudget)} ₴</div></div>
+      <div class="tile"><div class="tile-label">Прибуткових SKU</div><div class="tile-value">${profitable} / ${pfSkus.length}</div></div>`;
+    // Overall verdict
+    const netLabel=currentPfNet==='delvi'?'Делві':'Варус';
+    if(totalRoi>0 && profitable>pfSkus.length/2){
+      effDiv.innerHTML=`<div class="verdict v-yes"><div class="verdict-icon">✓</div><strong>${netLabel}:</strong> Портфель акцій загалом прибутковий. ${profitable} з ${pfSkus.length} SKU приносять додатковий прибуток. Критерії 1 та 3 виконані.</div>`;
+    } else if(totalRoi>-10){
+      effDiv.innerHTML=`<div class="verdict v-maybe"><div class="verdict-icon">~</div><strong>${netLabel}:</strong> Портфель акцій близький до беззбитковості. Рекомендується переглянути умови по збитковим SKU.</div>`;
+    } else {
+      effDiv.innerHTML=`<div class="verdict v-no"><div class="verdict-icon">✕</div><strong>${netLabel}:</strong> Портфель акцій збитковий. Лише ${profitable} з ${pfSkus.length} SKU прибуткові. Потрібно зменшити знижку або скоротити кількість SKU.</div>`;
+    }
+  } else summ.style.display='none';
+}
+
+// ══ СТІЙКІСТЬ ══
+function renderPersist(){
+  const wrap=document.getElementById('pers-months');
+  wrap.innerHTML='';
+  let html='<div style="display:grid;grid-template-columns:1.5fr 1fr 80px 1fr 1fr;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:11px;color:var(--text3);font-weight:500"><span>Місяць</span><span style="text-align:right">Факт (шт)</span><span style="text-align:center">Акція?</span><span style="text-align:right">Сез. база</span><span style="text-align:right">vs База</span></div>';
+  const neutral=parseFloat(document.getElementById('pers-neutral').value)||674;
+  persMonths.forEach((pm,i)=>{
+    const seaBase=Math.round(neutral*SEA[pm.month]);
+    const diff=seaBase>0?(pm.fact/seaBase-1)*100:0;
+    const diffColor=diff>5?'var(--green)':diff<-5?'var(--red)':'var(--text2)';
+    const bgColor=pm.isPromo?'var(--accent-bg)':'transparent';
+    html+=`<div style="display:grid;grid-template-columns:1.5fr 1fr 80px 1fr 1fr;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);align-items:center;background:${bgColor};border-radius:4px;padding-left:6px">
+      <span style="font-size:13px;font-weight:${pm.isPromo?'600':'400'}">${MONTHS[pm.month-1]}</span>
+      <input type="number" value="${pm.fact}" step="10" style="height:32px;font-size:13px" oninput="persMonths[${i}].fact=parseFloat(this.value)||0;calcPersist()">
+      <div style="text-align:center"><input type="checkbox" ${pm.isPromo?'checked':''} onchange="persMonths[${i}].isPromo=this.checked;calcPersist()" style="width:16px;height:16px;cursor:pointer"></div>
+      <span style="font-size:13px;text-align:right;color:var(--text3)">${fmtI(seaBase)}</span>
+      <span style="font-size:13px;text-align:right;font-weight:500;color:${diffColor}">${fmtP(diff)}</span>
+    </div>`;
+  });
+  wrap.innerHTML=html;
+  calcPersist();
+}
+
+function calcPersist(){
+  const neutral=parseFloat(document.getElementById('pers-neutral').value)||674;
+  const sku=document.getElementById('pers-sku').value;
+  const cont=document.getElementById('pers-results');
+
+  // Find post-promo months: non-promo months that come right after a promo month
+  let postPromoMonths=[];
+  let promoMonths=[];
+  let nonPromoMonths=[];
+  persMonths.forEach((pm,i)=>{
+    const seaBase=neutral*SEA[pm.month];
+    if(pm.isPromo) promoMonths.push({...pm,base:seaBase,uplift:(pm.fact/seaBase-1)*100});
+    else {
+      nonPromoMonths.push({...pm,base:seaBase,uplift:(pm.fact/seaBase-1)*100});
+      // Check if previous month was promo
+      if(i>0 && persMonths[i-1].isPromo) postPromoMonths.push({...pm,base:seaBase,uplift:(pm.fact/seaBase-1)*100});
+    }
+  });
+
+  const avgPromoUplift=promoMonths.length?promoMonths.reduce((a,m)=>a+m.uplift,0)/promoMonths.length:0;
+  const avgPostUplift=postPromoMonths.length?postPromoMonths.reduce((a,m)=>a+m.uplift,0)/postPromoMonths.length:0;
+  const avgNonPromo=nonPromoMonths.length?nonPromoMonths.reduce((a,m)=>a+m.uplift,0)/nonPromoMonths.length:0;
+  const persistRatio=avgPromoUplift!==0?(avgPostUplift/avgPromoUplift*100):0;
+
+  let html=`<div class="card">
+    <div class="card-title">Результати аналізу стійкості — ${sku}</div>
+    <div class="g4" style="margin-bottom:14px">
+      <div class="tile ${avgPromoUplift>0?'green':'red'}"><div class="tile-label">Сер. Uplift під час акції</div><div class="tile-value">${fmtP(avgPromoUplift)}</div><div class="tile-sub">${promoMonths.length} місяців</div></div>
+      <div class="tile ${avgPostUplift>0?'green':'red'}"><div class="tile-label">Сер. Uplift після акції</div><div class="tile-value">${fmtP(avgPostUplift)}</div><div class="tile-sub">${postPromoMonths.length} місяців</div></div>
+      <div class="tile ${avgNonPromo>-5?'green':'red'}"><div class="tile-label">Сер. неакційні місяці</div><div class="tile-value">${fmtP(avgNonPromo)}</div><div class="tile-sub">vs сез. база</div></div>
+      <div class="tile purple"><div class="tile-label">Коеф. стійкості</div><div class="tile-value">${isFinite(persistRatio)?fmt(persistRatio,0)+'%':'—'}</div><div class="tile-sub">пост/під час</div></div>
+    </div>`;
+
+  // Criterion 2 verdict
+  if(avgPostUplift>5){
+    html+=`<div class="verdict v-yes"><div class="verdict-icon">✓</div><strong>Критерій 2 виконаний:</strong> після акції продажі залишаються вище бази на ${fmt(avgPostUplift,1)}%. Ефект стійкий.</div>`;
+  } else if(avgPostUplift>-5){
+    html+=`<div class="verdict v-maybe"><div class="verdict-icon">~</div><strong>Критерій 2 частково:</strong> після акції продажі повертаються до бази (${fmtP(avgPostUplift)}). Немає стійкого ефекту, але і немає провалу.</div>`;
+  } else {
+    html+=`<div class="verdict v-no"><div class="verdict-icon">✕</div><strong>Критерій 2 не виконаний:</strong> після акції продажі падають нижче бази (${fmtP(avgPostUplift)}). Це "post-promotion dip" — ознака pantry loading або витіснення попиту.</div>`;
+  }
+
+  // Post-promo details
+  if(postPromoMonths.length){
+    html+=`<hr class="divider"><p style="font-size:12px;color:var(--text3);margin-bottom:8px">Деталі пост-акційних місяців:</p>`;
+    postPromoMonths.forEach(pm=>{
+      const ic=pm.uplift>5?'green':pm.uplift<-5?'red':'amber';
+      html+=`<div style="display:flex;align-items:center;gap:10px;padding:5px 0">
+        <span style="font-size:13px;width:100px">${MONTHS[pm.month-1]}</span>
+        <span style="font-size:13px">${fmtI(pm.fact)} шт</span>
+        <span style="font-size:12px;color:var(--text3)">база ${fmtI(Math.round(pm.base))}</span>
+        <span class="pill" style="background:var(--${ic}-bg);color:var(--${ic})">${fmtP(pm.uplift)}</span>
+      </div>`;
+    });
+  }
+  html+=`</div>`;
+  cont.innerHTML=html;
+}
+
+// ══ ПОРІВНЯННЯ ══
+function renderCompare(){
+  const discPct=parseFloat(document.getElementById('c-disc').value)||0;
+  const month=parseInt(document.getElementById('c-month').value)||6;
+  const upl=parseFloat(document.getElementById('c-upl').value)||0;
+  const seaCoef=SEA[month]||1;
+  const allSkus=[...PRESETS_DELVI.map(s=>({...s,net:'Делві'})),...PRESETS_VARUS.map(s=>({...s,net:'Варус'})),...planSkus.filter(s=>s.price>0&&s.cost>=0&&s.base>0).map(s=>({...s,net:'Custom'}))];
+  const wrap=document.getElementById('cmp-table-wrap');
+  const rows=allSkus.map(s=>{
+    const m=calcMetrics(s.price,s.cost,discPct);
+    const seaBase=s.base*seaCoef;
+    const beVol=seaBase*(m.be/100);
+    const promoVol=seaBase*(1+upl/100);
+    const budget=m.disc*promoVol;
+    const incr=(m.mp*promoVol)-(m.mb*seaBase);
+    const roi=budget>0?incr/budget*100:0;
+    const costPer=promoVol>seaBase?budget/(promoVol-seaBase):Infinity;
+    let diff,dBg,dTxt;
+    if(m.be>100){diff='Дуже важко';dBg='#FDECEA';dTxt='#C0392B';}
+    else if(m.be>70){diff='Важко';dBg='#FEF3DC';dTxt='#92580A';}
+    else if(m.be>40){diff='Реально';dBg='#FFF8E8';dTxt='#92580A';}
+    else{diff='Легко';dBg='#E8F5EE';dTxt='#1A7A4A';}
+    return{s,m,seaBase,beVol,roi,incr,diff,dBg,dTxt,costPer};
+  }).sort((a,b)=>a.m.be-b.m.be);
+  let html=`<table class="cmp-table"><thead><tr>
+    <th>SKU</th><th>Мережа</th><th>Ціна</th><th>BE Uplift</th><th>+шт</th><th>ROI @${upl}%</th><th>₴/інкр.од</th><th></th>
+  </tr></thead><tbody>`;
+  rows.forEach(({s,m,seaBase,beVol,roi,incr,diff,dBg,dTxt,costPer})=>{
+    const beColor=m.be>100?'var(--red)':m.be>50?'var(--amber)':'var(--green)';
+    const roiColor=roi>0?'var(--green)':roi<0?'var(--red)':'var(--amber)';
+    html+=`<tr>
+      <td>${s.name}</td>
+      <td><span class="pill" style="background:${s.net==='Делві'?'#EBF0FF':'#F0E8FF'};color:${s.net==='Делві'?'#2B5CE6':'#6C3FA0'}">${s.net}</span></td>
+      <td>${fmt(s.price)} ₴</td>
+      <td style="font-weight:500;color:${beColor}">${fmt(m.be,1)}%</td>
+      <td>+${fmtI(beVol)}</td>
+      <td style="font-weight:500;color:${roiColor}">${fmtP(roi)}</td>
+      <td>${isFinite(costPer)?fmt(costPer,1)+' ₴':'—'}</td>
+      <td><span class="pill" style="background:${dBg};color:${dTxt}">${diff}</span></td>
+    </tr>`;
+  });
+  html+='</tbody></table>';
+  wrap.innerHTML=html;
+}
+
+// ══ МЕРЕЖІ ══
+function renderNetwork(){
+  const cont=document.getElementById('network-comparison');
+  const ins=document.getElementById('network-insights');
+  const discPct=10;
+
+  function calcNetworkSummary(data,label){
+    let totalBudget=0,totalIncr=0,profitable=0,totalPromo=0,totalBase=0;
+    const skuResults=[];
+    data.forEach(sku=>{
+      const m=calcMetrics(sku.price,sku.cost,discPct);
+      let tp=0,tb=0;
+      sku.months.forEach(mo=>{tp+=mo.fact;tb+=mo.base;});
+      const budget=m.disc*tp;
+      const incr=(m.mp*tp)-(m.mb*tb);
+      const roi=budget>0?incr/budget*100:0;
+      const uplift=tb>0?(tp/tb-1)*100:0;
+      totalBudget+=budget;totalIncr+=incr;totalPromo+=tp;totalBase+=tb;
+      if(incr>0)profitable++;
+      skuResults.push({name:sku.name,roi,uplift,incr,budget,count:sku.months.length});
+    });
+    const totalRoi=totalBudget>0?totalIncr/totalBudget*100:0;
+    return{label,totalBudget,totalIncr,totalRoi,profitable,total:data.length,skuResults,totalPromo,totalBase};
+  }
+
+  const delvi=calcNetworkSummary(PF_DELVI,'Делві');
+  const varus=calcNetworkSummary(PF_VARUS,'Варус');
+
+  let html=`<table class="cmp-table"><thead><tr>
+    <th>Показник</th><th>Делві</th><th>Варус</th>
+  </tr></thead><tbody>
+    <tr><td>SKU в акціях</td><td>${delvi.total}</td><td>${varus.total}</td></tr>
+    <tr><td>Прибуткових</td><td style="color:var(--green);font-weight:500">${delvi.profitable} / ${delvi.total}</td><td style="color:var(--green);font-weight:500">${varus.profitable} / ${varus.total}</td></tr>
+    <tr><td>Загальний ROI</td><td style="color:${delvi.totalRoi>0?'var(--green)':'var(--red)'};font-weight:600">${fmtP(delvi.totalRoi)}</td><td style="color:${varus.totalRoi>0?'var(--green)':'var(--red)'};font-weight:600">${fmtP(varus.totalRoi)}</td></tr>
+    <tr><td>Інкр. маржа</td><td style="color:${delvi.totalIncr>0?'var(--green)':'var(--red)'}">${fmtG(delvi.totalIncr)}</td><td style="color:${varus.totalIncr>0?'var(--green)':'var(--red)'}">${fmtG(varus.totalIncr)}</td></tr>
+    <tr><td>Бюджет знижок</td><td>${fmtI(delvi.totalBudget)} ₴</td><td>${fmtI(varus.totalBudget)} ₴</td></tr>
+    <tr><td>Загальний Uplift</td><td>${fmtP(delvi.totalBase>0?(delvi.totalPromo/delvi.totalBase-1)*100:0)}</td><td>${fmtP(varus.totalBase>0?(varus.totalPromo/varus.totalBase-1)*100:0)}</td></tr>
+  </tbody></table>`;
+
+  html+=`<div style="margin-top:16px;font-size:12px;font-weight:500;color:var(--text2)">Деталі по SKU:</div>`;
+  html+=`<div class="g2" style="margin-top:8px">`;
+  [delvi,varus].forEach(net=>{
+    html+=`<div>
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">${net.label}</div>`;
+    net.skuResults.sort((a,b)=>b.roi-a.roi).forEach(s=>{
+      const cl=s.roi>0?'green':s.roi<0?'red':'amber';
+      html+=`<div style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center">
+        <div><span style="font-size:12px;font-weight:500">${s.name}</span><br><span style="font-size:10px;color:var(--text3)">${s.count} міс. · Uplift ${fmtP(s.uplift)}</span></div>
+        <div style="text-align:right"><span style="font-family:Unbounded;font-size:14px;font-weight:600;color:var(--${cl})">${fmtP(s.roi)}</span><br><span style="font-size:10px;color:var(--text3)">${fmtG(s.incr)}</span></div>
+      </div>`;
+    });
+    html+=`</div>`;
+  });
+  html+=`</div>`;
+  cont.innerHTML=html;
+
+  // Insights
+  let insHtml='';
+  if(delvi.totalRoi>varus.totalRoi){
+    insHtml+=`<div class="verdict v-info"><div class="verdict-icon">i</div>Делві показує вищий загальний ROI (${fmtP(delvi.totalRoi)} vs ${fmtP(varus.totalRoi)}). Акції у Варус мають більший масштаб, але нижчу ефективність на гривню.</div>`;
+  } else {
+    insHtml+=`<div class="verdict v-info"><div class="verdict-icon">i</div>Варус показує вищий ROI (${fmtP(varus.totalRoi)} vs ${fmtP(delvi.totalRoi)}).</div>`;
+  }
+  insHtml+=`<div class="verdict v-info" style="margin-top:8px"><div class="verdict-icon">!</div><strong>Увага:</strong> Дані по Варус — з листа "Акції" (ціна відвантаження + продажі бут.). Собівартість для ряду SKU приблизна. Для точного розрахунку потрібна фактична собівартість з бухгалтерії.</div>`;
+  insHtml+=`<div class="verdict v-info" style="margin-top:8px"><div class="verdict-icon">i</div><strong>Рекомендація:</strong> порівнювати однакові SKU між мережами для чистого бенчмарку. Green Day GD присутній в обох мережах — можна порівняти uplift при однаковій знижці.</div>`;
+  ins.innerHTML=insHtml;
+}
+
+// ══ МЕТОДОЛОГІЯ ══
+function renderHelp(){
+  const grid=document.getElementById('sea-grid');
+  grid.innerHTML='';
+  Object.entries(SEA).forEach(([m,k])=>{
+    const isBase=k===1.0;
+    const div=document.createElement('div');
+    div.className='tile'+(k>1.1?' green':k<1?' amber':'');
+    div.innerHTML=`<div class="tile-label">${MONTHS[m-1]}</div><div class="tile-value">${k.toFixed(2)}</div><div class="tile-sub">${isBase?'еталон':k>1?`+${((k-1)*100).toFixed(0)}%`:`−${((1-k)*100).toFixed(0)}%`}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+// ── INIT ──
+renderPlanPresets();
+renderPlanSkus();
+renderPfSkus();
+</script>
+</body>
+</html>
